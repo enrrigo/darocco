@@ -4,33 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Da Rocco AR</title>
-
 <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
 
 <style>
 body{
 margin:0;
-font-family:Arial, sans-serif;
-background:url('images/sfondo.jpg') center center no-repeat fixed;
+font-family:-apple-system,BlinkMacSystemFont;
+background:url('images/sfondo.jpg') center center no-repeat;
 background-size:cover;
 color:white;
-overflow:hidden;
 }
 
-.dark-overlay{
+.overlay{
 position:fixed;
-top:0;
-left:0;
 width:100%;
 height:100%;
-background:rgba(0,0,0,0.65);
-z-index:0;
+background:rgba(0,0,0,0.75);
+z-index:-1;
 }
 
-.container{
-position:relative;
-z-index:2;
+.screen{
 height:100vh;
 display:flex;
 flex-direction:column;
@@ -39,56 +32,60 @@ justify-content:center;
 }
 
 #logo{
-width:200px;
-margin-bottom:20px;
+width:180px;
+margin-bottom:40px;
 }
 
-button{
-padding:14px 28px;
-font-size:18px;
-border:none;
-border-radius:8px;
+.button{
+padding:15px 40px;
 background:#c62828;
-color:white;
-cursor:pointer;
+border-radius:12px;
+font-size:20px;
 }
 
-.section{
+.menu{
 display:none;
-width:100%;
+flex-direction:column;
+align-items:center;
 height:100vh;
-text-align:center;
-padding-top:40px;
-box-sizing:border-box;
+padding-top:60px;
 }
 
-.section h2{
-margin-bottom:20px;
-}
-
-.scroll-list{
-height:60vh;
+.wheel{
+margin-top:40px;
+height:260px;
 overflow-y:scroll;
 scroll-snap-type:y mandatory;
+width:100%;
+text-align:center;
 }
 
-.scroll-item{
-padding:20px;
-font-size:22px;
+.item{
+height:80px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:26px;
 scroll-snap-align:center;
-border-bottom:1px solid rgba(255,255,255,0.2);
 }
 
-.scroll-item:active{
-background:rgba(255,255,255,0.1);
+.item.active{
+font-size:30px;
+color:#ff5252;
 }
 
-.back{
-margin-top:20px;
-background:#444;
+.closeAR{
+position:absolute;
+top:40px;
+left:20px;
+background:#000;
+padding:10px 20px;
+border-radius:10px;
+color:white;
+z-index:5;
 }
 
-#ar-view{
+#arContainer{
 display:none;
 position:fixed;
 top:0;
@@ -96,130 +93,90 @@ left:0;
 width:100%;
 height:100%;
 background:black;
-z-index:999;
 }
 </style>
 </head>
 
 <body>
 
-<div class="dark-overlay"></div>
+<div class="overlay"></div>
 
-<!-- SUONI -->
-<audio id="dinSound" src="sounds/din.mp3"></audio>
-<audio id="piattiSound" src="sounds/piatti.mp3"></audio>
+<audio id="din" src="sounds/din.mp3"></audio>
+<audio id="piatti" src="sounds/piatti.mp3"></audio>
 
-<!-- SCHERMATA INIZIALE -->
-<div class="container" id="home">
+<!-- HOME -->
+<div class="screen" id="home">
 <img src="images/logo.png" id="logo">
-<button onclick="entra()">ENTRA</button>
+<div class="button" onclick="enter()">ENTRA</div>
 </div>
 
-<!-- MENU SEZIONI -->
-<div class="section" id="menu">
+<!-- MENU -->
+<div class="menu" id="menu">
 <img src="images/logo.png" id="logo">
-<h2>Menu</h2>
-<button onclick="openSection('pizze')">Pizze</button>
-<button onclick="openSection('speciali')">Pizze Speciali</button>
-<button onclick="openSection('hamburger')">Hamburger</button>
+<div class="wheel" id="wheel">
+<div class="item">Margherita</div>
+<div class="item">Diavola</div>
+<div class="item">Capricciosa</div>
+<div class="item">Tartufo</div>
+<div class="item">Classic Burger</div>
+<div class="item">Cheese Burger</div>
+</div>
 </div>
 
-<!-- SEZIONE PIZZE -->
-<div class="section" id="pizze">
-<img src="images/logo.png" id="logo">
-<h2>Pizze</h2>
-<div class="scroll-list" onscroll="playDin()">
-<div class="scroll-item" onclick="openAR()">Margherita</div>
-<div class="scroll-item" onclick="openAR()">Diavola</div>
-<div class="scroll-item" onclick="openAR()">Capricciosa</div>
-</div>
-<button class="back" onclick="backMenu()">Indietro</button>
-</div>
+<!-- AR -->
+<div id="arContainer">
+<div class="closeAR" onclick="closeAR()">Chiudi</div>
 
-<!-- SEZIONE SPECIALI -->
-<div class="section" id="speciali">
-<img src="images/logo.png" id="logo">
-<h2>Pizze Speciali</h2>
-<div class="scroll-list" onscroll="playDin()">
-<div class="scroll-item" onclick="openAR()">Tartufo</div>
-<div class="scroll-item" onclick="openAR()">Porcini</div>
-<div class="scroll-item" onclick="openAR()">Crudo & Burrata</div>
-</div>
-<button class="back" onclick="backMenu()">Indietro</button>
-</div>
-
-<!-- SEZIONE HAMBURGER -->
-<div class="section" id="hamburger">
-<img src="images/logo.png" id="logo">
-<h2>Hamburger</h2>
-<div class="scroll-list" onscroll="playDin()">
-<div class="scroll-item" onclick="openAR()">Classic</div>
-<div class="scroll-item" onclick="openAR()">Cheese</div>
-<div class="scroll-item" onclick="openAR()">BBQ</div>
-</div>
-<button class="back" onclick="backMenu()">Indietro</button>
-</div>
-
-<!-- AR VIEW -->
-<div id="ar-view">
-<button onclick="closeAR()" style="position:absolute;top:20px;left:20px;z-index:1000;">Chiudi</button>
-
-<a-scene embedded arjs="sourceType: webcam;">
-<a-marker preset="hiro">
-<a-entity 
+<a-scene embedded webxr="requiredFeatures: hit-test; optionalFeatures: local-floor">
+<a-entity
 gltf-model="models/pizza.glb"
-scale="0.5 0.5 0.5">
+scale="0.5 0.5 0.5"
+position="0 0 -2">
 </a-entity>
-</a-marker>
-<a-entity camera></a-entity>
+<a-camera position="0 1.6 0"></a-camera>
 </a-scene>
+
 </div>
 
 <script>
 
-const din = document.getElementById("dinSound");
-const piatti = document.getElementById("piattiSound");
+let lastIndex = -1;
+const wheel = document.getElementById('wheel');
+const items = document.querySelectorAll('.item');
+const din = document.getElementById('din');
+const piatti = document.getElementById('piatti');
 
-let lastScroll = 0;
+function enter(){
+document.getElementById('home').style.display='none';
+document.getElementById('menu').style.display='flex';
+}
 
-function playDin(){
-let now = Date.now();
-if(now - lastScroll > 120){
+wheel.addEventListener('scroll', ()=>{
+let index = Math.round(wheel.scrollTop / 80);
+
+if(index !== lastIndex && items[index]){
+items.forEach(i=>i.classList.remove('active'));
+items[index].classList.add('active');
 din.currentTime = 0;
 din.play();
-lastScroll = now;
+lastIndex = index;
 }
-}
+});
 
-function entra(){
-document.getElementById("home").style.display="none";
-document.getElementById("menu").style.display="block";
-}
-
-function openSection(id){
-document.getElementById("menu").style.display="none";
-document.getElementById(id).style.display="block";
-}
-
-function backMenu(){
-document.querySelectorAll(".section").forEach(s=>s.style.display="none");
-document.getElementById("menu").style.display="block";
-}
-
-function openAR(){
+items.forEach(item=>{
+item.addEventListener('click', ()=>{
 piatti.currentTime=0;
 piatti.play();
-
-document.querySelectorAll(".section").forEach(s=>s.style.display="none");
-document.getElementById("ar-view").style.display="block";
-}
+document.getElementById('menu').style.display='none';
+document.getElementById('arContainer').style.display='block';
+});
+});
 
 function closeAR(){
 piatti.currentTime=0;
 piatti.play();
-
-document.getElementById("ar-view").style.display="none";
-document.getElementById("menu").style.display="block";
+document.getElementById('arContainer').style.display='none';
+document.getElementById('menu').style.display='flex';
 }
 
 </script>
