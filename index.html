@@ -116,12 +116,11 @@ display:none;
 <button onclick="enter()">ENTRA</button>
 </div>
 
-<!-- AUDIO -->
 <audio id="tick" src="sounds/din.mp3" preload="auto"></audio>
 <audio id="dish" src="sounds/piatti.mp3" preload="auto"></audio>
 
 <header>
-<img src="images/logo.jpg" alt="Da Rocco">
+<img src="images/logo.png" alt="Da Rocco">
 </header>
 
 <div class="menu">
@@ -129,41 +128,38 @@ display:none;
 <div class="section">
 <div class="section-title">PIZZE</div>
 <div class="list" onscroll="checkCenter(this)">
-<div class="item" onclick="openAR()">Margherita</div>
-<div class="item" onclick="openAR()">Diavola</div>
-<div class="item" onclick="openAR()">Capricciosa</div>
-<div class="item" onclick="openAR()">Quattro Formaggi</div>
-<div class="item" onclick="openAR()">Tirolese</div>
+<div class="item" onclick="openAR('pizza')">Margherita</div>
+<div class="item" onclick="openAR('pizza')">Diavola</div>
+<div class="item" onclick="openAR('pizza')">Capricciosa</div>
+<div class="item" onclick="openAR('pizza')">Quattro Formaggi</div>
+<div class="item" onclick="openAR('pizza')">Tirolese</div>
 </div>
 </div>
 
 <div class="section">
 <div class="section-title">PIZZE SPECIALI</div>
 <div class="list" onscroll="checkCenter(this)">
-<div class="item" onclick="openAR()">Tartufo</div>
-<div class="item" onclick="openAR()">Burrata</div>
-<div class="item" onclick="openAR()">Porcini</div>
-<div class="item" onclick="openAR()">Stracciatella</div>
+<div class="item" onclick="openAR('pizza')">Tartufo</div>
+<div class="item" onclick="openAR('pizza')">Burrata</div>
+<div class="item" onclick="openAR('pizza')">Porcini</div>
+<div class="item" onclick="openAR('pizza')">Stracciatella</div>
 </div>
 </div>
 
 <div class="section">
 <div class="section-title">HAMBURGER</div>
 <div class="list" onscroll="checkCenter(this)">
-<div class="item" onclick="openAR()">Classic Burger</div>
-<div class="item" onclick="openAR()">Cheese Burger</div>
-<div class="item" onclick="openAR()">Bacon Burger</div>
-<div class="item" onclick="openAR()">Double Smash</div>
+<div class="item" onclick="openAR('panino')">Classic Burger</div>
+<div class="item" onclick="openAR('pizza')">Cheese Burger</div>
+<div class="item" onclick="openAR('pizza')">Bacon Burger</div>
+<div class="item" onclick="openAR('pizza')">Double Smash</div>
 </div>
 </div>
 
 </div>
 
-<!-- MODEL VIEWER AR -->
 <model-viewer
 id="ar"
-src="models/pizza.glb"
-ios-src="models/pizza.usdz"
 ar
 ar-modes="scene-viewer quick-look webxr"
 ar-scale="fixed"
@@ -181,13 +177,11 @@ let unlocked=false;
 let enteredAR=false;
 const lastIndex=new WeakMap();
 
-/* SBLOCCO AUDIO */
 function enter(){
 unlocked=true;
 document.getElementById("start").style.display="none";
 }
 
-/* DIN DURANTE SCROLL */
 function checkCenter(list){
 
 if(!unlocked) return;
@@ -220,8 +214,7 @@ if(navigator.vibrate) navigator.vibrate(8);
 });
 }
 
-/* APERTURA AR SOLO SU PIETANZA */
-function openAR(){
+function openAR(type){
 
 if(!unlocked) return;
 
@@ -229,12 +222,20 @@ const dish=document.getElementById("dish");
 dish.currentTime=0;
 dish.play().catch(()=>{});
 
-enteredAR=true;
+const viewer=document.getElementById("ar");
 
-document.getElementById("ar").activateAR();
+if(type==="panino"){
+viewer.src="models/panino.glb";
+viewer.setAttribute("ios-src","models/panino.usdz");
+}else{
+viewer.src="models/pizza.glb";
+viewer.setAttribute("ios-src","models/pizza.usdz");
 }
 
-/* RIENTRO MENU SENZA SUONO EXTRA */
+enteredAR=true;
+viewer.activateAR();
+}
+
 window.addEventListener("focus",()=>{
 enteredAR=false;
 });
