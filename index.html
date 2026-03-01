@@ -18,15 +18,13 @@ box-sizing:border-box;
 
 body{
 margin:0;
-font-family:'Playfair Display', system-ui;
+font-family:'Playfair Display', serif;
 background:
-linear-gradient(rgba(0,0,0,.7),rgba(0,0,0,.7)),
+linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.75)),
 url("images/sfondo.jpg") center/cover no-repeat fixed;
 color:#fff;
-overflow:hidden;
 }
 
-/* START */
 #start{
 position:fixed;
 inset:0;
@@ -34,7 +32,7 @@ background:#000;
 display:flex;
 align-items:center;
 justify-content:center;
-z-index:10;
+z-index:50;
 }
 
 #start button{
@@ -47,21 +45,18 @@ background:linear-gradient(145deg,#b71c1c,#7f0000);
 color:white;
 }
 
-/* HEADER */
 header{
-padding:14px;
-background:linear-gradient(#000,#0008);
+padding:20px 14px 10px;
 text-align:center;
 }
 
 header img{
 width:100%;
-max-height:150px;
+max-height:160px;
 object-fit:contain;
 display:block;
 }
 
-/* MENU */
 .menu{
 height:calc(100vh - 190px);
 overflow-y:auto;
@@ -69,16 +64,15 @@ padding:12px;
 }
 
 .section{
-margin-bottom:24px;
+margin-bottom:28px;
 }
 
 .section-title{
 font-size:22px;
-margin:8px 6px 10px;
+margin:8px 6px 14px;
 color:#ffccbc;
 }
 
-/* SCROLLER */
 .list{
 position:relative;
 max-height:260px;
@@ -88,7 +82,6 @@ background:linear-gradient(180deg,#4e342e,#3e2723);
 padding:10px 0;
 }
 
-/* linea centrale soft */
 .list::after{
 content:"";
 position:absolute;
@@ -96,7 +89,7 @@ top:50%;
 left:20px;
 right:20px;
 height:1px;
-background:rgba(255,255,255,0.08);
+background:rgba(255,255,255,.15);
 pointer-events:none;
 }
 
@@ -108,9 +101,9 @@ border-radius:14px;
 text-align:center;
 font-size:18px;
 user-select:none;
+cursor:pointer;
 }
 
-/* MODEL VIEWER NASCOSTO */
 model-viewer{
 display:none;
 }
@@ -123,12 +116,12 @@ display:none;
 <button onclick="enter()">ENTRA</button>
 </div>
 
+<!-- AUDIO -->
 <audio id="tick" src="sounds/din.mp3" preload="auto"></audio>
-<audio id="click" src="sounds/piatti.mp3" preload="auto"></audio>
-<audio id="reload" src="sounds/piatti.mp3" preload="auto"></audio>
+<audio id="dish" src="sounds/piatti.mp3" preload="auto"></audio>
 
 <header>
-<img src="images/logo.png" alt="Da Rocco">
+<img src="images/logo.jpg" alt="Da Rocco">
 </header>
 
 <div class="menu">
@@ -166,7 +159,7 @@ display:none;
 
 </div>
 
-<!-- AR VIEWER CORRETTO -->
+<!-- MODEL VIEWER AR -->
 <model-viewer
 id="ar"
 src="models/pizza.glb"
@@ -175,71 +168,77 @@ ar
 ar-modes="scene-viewer quick-look webxr"
 ar-scale="fixed"
 camera-controls
-auto-rotate
-shadow-intensity="1"
-shadow-softness="0.8"
+shadow-intensity="0.6"
 environment-image="neutral"
-exposure="1"
-style="display:none;">
+exposure="0.8"
+tone-mapping="neutral"
+interaction-prompt="none">
 </model-viewer>
 
 <script>
+
 let unlocked=false;
 let enteredAR=false;
 const lastIndex=new WeakMap();
 
-/* ENTER */
+/* SBLOCCO AUDIO */
 function enter(){
 unlocked=true;
-const c=document.getElementById("click");
-c.currentTime=0;
-c.play();
 document.getElementById("start").style.display="none";
 }
 
-/* SCROLL SOUND */
+/* DIN DURANTE SCROLL */
 function checkCenter(list){
-if(!unlocked)return;
+
+if(!unlocked) return;
+
+const listRect=list.getBoundingClientRect();
+const centerY=listRect.top + listRect.height/2;
 
 const items=list.querySelectorAll(".item");
-const center=list.scrollTop + list.clientHeight/2;
 
 items.forEach((item,i)=>{
-const itemCenter=item.offsetTop + item.offsetHeight/2;
 
-if(Math.abs(itemCenter-center) < 10){
+const rect=item.getBoundingClientRect();
+const itemCenter=rect.top + rect.height/2;
+
+if(Math.abs(itemCenter-centerY) < 12){
+
 if(lastIndex.get(list)!==i){
+
 lastIndex.set(list,i);
-const t=document.getElementById("tick");
-t.currentTime=0;
-t.play();
+
+const tick=document.getElementById("tick");
+tick.currentTime=0;
+tick.play().catch(()=>{});
+
 if(navigator.vibrate) navigator.vibrate(8);
+
 }
 }
+
 });
 }
 
-/* OPEN AR */
+/* APERTURA AR SOLO SU PIETANZA */
 function openAR(){
-const c=document.getElementById("click");
-c.currentTime=0;
-c.play();
+
+if(!unlocked) return;
+
+const dish=document.getElementById("dish");
+dish.currentTime=0;
+dish.play().catch(()=>{});
 
 enteredAR=true;
 
-const viewer=document.getElementById("ar");
-viewer.activateAR();
+document.getElementById("ar").activateAR();
 }
 
-/* SOUND ON RETURN */
+/* RIENTRO MENU SENZA SUONO EXTRA */
 window.addEventListener("focus",()=>{
-if(unlocked && enteredAR){
-const r=document.getElementById("reload");
-r.currentTime=0;
-r.play();
 enteredAR=false;
-}
 });
+
 </script>
 
 </body>
